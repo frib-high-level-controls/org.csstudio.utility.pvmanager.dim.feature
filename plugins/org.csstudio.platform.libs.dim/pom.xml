@@ -8,5 +8,6 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>org.csstudio.platform.libs.dim</artifactId>
+  <version>0.20.13-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>
