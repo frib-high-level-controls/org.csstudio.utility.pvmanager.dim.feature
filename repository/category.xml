@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+
+  <category-def label="FRIB Features" name="FRIB Features">
+                <description>FRIB Features: contains FRIB specific features.</description>
+  </category-def>
+   
+   <feature id="org.csstudio.pvmanager.dim.feature.source">
+      <category name="FRIB Features"/>
+   </feature>
+
+   <feature id="org.csstudio.pvmanager.dim.feature">
+      <category name="FRIB Features"/>
+   </feature>
+
+</site>
