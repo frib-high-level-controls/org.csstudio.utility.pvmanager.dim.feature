@@ -37,8 +37,8 @@ public class DimDataSourceFromPreferences extends DimDataSource {
 
 
 		server = prefs.getString(Activator.PLUGIN_ID,
-				PreferenceConstants.server,
-				"lebit-cs.intranet.nscl.msu.edu", null);
+				PreferenceConstants.DNS_SERVER,
+				"localhost", null);
 	}
 
 	private static DimDataSource builder() {

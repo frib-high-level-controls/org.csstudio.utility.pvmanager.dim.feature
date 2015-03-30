@@ -5,7 +5,7 @@ package org.csstudio.utility.pvmanager.dim;
  */
 public class PreferenceConstants {
 	
-	public static final String server = "lebit-cs.intranet.nscl.msu.edu";
+	public static final String DNS_SERVER = "dns_server";
 
 	
 }

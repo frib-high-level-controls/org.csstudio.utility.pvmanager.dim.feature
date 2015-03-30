@@ -17,5 +17,14 @@
             primary="true">
       </toc>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.csstudio.platform.ui.css.platform"
+            class="org.csstudio.utility.pvmanager.dim.PreferencePage"
+            id="org.csstudio.utility.pvmanager.dim.preferencepage"
+            name="DIM">
+      </page>
+   </extension>
 
 </plugin>
