@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.epics.pvmanager.ChannelWriteCallback;
 import org.epics.pvmanager.MultiplexedChannelHandler;
@@ -26,7 +28,7 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 
 	final String channelName;
 	final Class CType;
-	String formats;
+	List<FormatType> formatList = new ArrayList<FormatType>();
 	final boolean writeTrue;
 	DimInfo dimInfo;
 
@@ -44,7 +46,19 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 			this.CType = null;
 		}
 		String[] srvcs = DimBrowser.getServices(this.channelName);
-		formats = DimBrowser.getFormat(this.channelName);
+		String formatString = DimBrowser.getFormat(this.channelName);
+		
+		String[] format = formatString.split(";");
+		for(String formatItem:format) {
+			String[] typeWithQuanity = formatItem.split(":");
+			String functionCode = typeWithQuanity[0];
+			Integer quantity = 1;
+			if (typeWithQuanity.length > 1) {
+				quantity = Integer.valueOf(typeWithQuanity[1]);
+			}
+			formatList.add(new FormatType(functionCode,quantity));
+		}
+		
 		if (srvcs.length == 1) {
 			this.writeTrue = DimBrowser.isCommand(srvcs[0]);
 		} else {
@@ -62,7 +76,28 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 				processMessage(ValueFactory.newVString("",
 						ValueFactory.alarmNone(), ValueFactory.timeNow()));
 			} else {
-				dimInfo = new PVManagerDim(channelName, -99999999);
+				if (formatList.size()==1){
+					String functionCode = formatList.get(0).functionCode;
+					switch(functionCode){
+					case "I":
+					case "S":
+						dimInfo = new PVManagerDim(channelName, (int)-99999999);
+						break;
+					case "F":
+					case "X":
+						dimInfo = new PVManagerDim(channelName, (float)-99999999);
+						break;
+					case "D":
+						dimInfo = new PVManagerDim(channelName, (double)-99999999);
+						break;
+					case "C":
+						dimInfo = new PVManagerDim(channelName, "-99999999");
+						break;
+					default:
+						dimInfo = new PVManagerDim(channelName, "-99999999");
+					}		
+				}
+				
 
 				DimExitHandler exid = new DimExitHandler() {
 					public void exitHandler(int code) {
@@ -165,29 +200,24 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 
 		public void infoHandler() {
 			String name = getName();
-			String formats = DimChannelHandler.this.formats;
 			VType vtype = null;
 
 			// Not covering
 			// byte dByte = getByte();
 			// byte[] dByteArray = getByteArray();
 
-			if (getInt() == -99999999) {
+			if (getInt() == -99999999 || getDouble() == -99999999 || getFloat() == -99999999 || getString() == "-99999999" ) {
 				processConnection(null);
 			} else {
 				processConnection(DimChannelHandler.this);
 			}
 
 			Object value = null;
-			if (formats != null) {
-				String[] format = formats.split(";");
-				if (format.length == 1) {
-					String[] typeWithQuanity = format[0].split(":");
-					String type = typeWithQuanity[0];
-					Integer quantity = 1;
-					if (typeWithQuanity.length > 1) {
-						quantity = Integer.valueOf(typeWithQuanity[1]);
-					}
+			if (!formatList.isEmpty()) {
+				if (formatList.size() == 1) {
+					String type = formatList.get(0).functionCode;
+					Integer quantity = formatList.get(0).quantity;
+
 					if (AdaptorUtil.typesMap.containsKey(type)) {
 
 						try {
@@ -252,7 +282,7 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 						 }
 					}
 
-				} else if (format.length > 1) {
+				} else if (formatList.size() > 1) {
 					// List<Class<?>> types = new ArrayList<Class<?>>();
 					// List<String> names = new ArrayList<String>();
 					// List<Object> values = new ArrayList<Object>();
