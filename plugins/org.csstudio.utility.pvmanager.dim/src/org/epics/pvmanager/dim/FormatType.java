@@ -5,7 +5,7 @@ public class FormatType {
 	String function;
 	String arrayFunction;
 	Integer quantity;
-	String functionCode;
+    String functionCode;
 
 	public FormatType(String functionCode, Class<?> classType, String function,
 			String arrayFunction) {
@@ -18,6 +18,48 @@ public class FormatType {
 	public FormatType(String functionCode, Integer quantity) {
 		this.functionCode = functionCode;
 		this.quantity = quantity;
+	}
+	
+	
+
+	public Class<?> getClassType() {
+		return classType;
+	}
+
+	public void setClassType(Class<?> classType) {
+		this.classType = classType;
+	}
+
+	public String getFunction() {
+		return function;
+	}
+
+	public void setFunction(String function) {
+		this.function = function;
+	}
+
+	public String getArrayFunction() {
+		return arrayFunction;
+	}
+
+	public void setArrayFunction(String arrayFunction) {
+		this.arrayFunction = arrayFunction;
+	}
+
+	public Integer getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
+	}
+
+	public String getFunctionCode() {
+		return functionCode;
+	}
+
+	public void setFunctionCode(String functionCode) {
+		this.functionCode = functionCode;
 	}
 
 	@Override

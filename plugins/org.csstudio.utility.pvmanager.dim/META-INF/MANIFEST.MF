@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.csstudio.platform.libs.dim;bundle-version="0.20.13",
  org.eclipse.jface,
  org.eclipse.ui.workbench,
- org.eclipse.ui
+ org.eclipse.ui,
+ com.google.guava;bundle-version="18.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.epics.pvmanager.dim
