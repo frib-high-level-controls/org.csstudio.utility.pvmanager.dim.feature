@@ -2,6 +2,7 @@ package org.epics.pvmanager.dim.adapters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.epics.pvmanager.dim.AdaptorUtil;
 import org.epics.pvmanager.dim.FormatType;
@@ -29,20 +30,25 @@ public class PVManagerDimShort extends DimInfo implements PVManagerDim {
 		Object value = null;
 		if (!formatList.isEmpty()) {
 			if (formatList.size() == 1) {
-				String type = formatList.get(0).getFunctionCode();
-				Integer quantity = formatList.get(0).getQuantity();
+				String type = formatList.get(0).getFunctionCode().toUpperCase();
+				Optional<Integer> quantity = formatList.get(0).getQuantity();
 				if (AdaptorUtil.typesMap.containsKey(type)) {
-					if (quantity == 1){ 
-						value = getShort();
-						testConnection((short)value);
-					} else{
-						List<Short> array = new ArrayList<Short>();
-						for(int i=0;i<quantity;i++){
-							short popShort = getShort();
-							testConnection(popShort);
-							array.add(popShort);
+					if (quantity.isPresent()) {
+						if (quantity.get() == 1) {
+							value = getShort();
+							testConnection((short) value);
+						} else {
+							List<Short> array = new ArrayList<Short>();
+							for (int i = 0; i < quantity.get(); i++) {
+								short popShort = getShort();
+								testConnection(popShort);
+								array.add(popShort);
+							}
+							value = Shorts.toArray(array);
 						}
-						value = Shorts.toArray(array);
+					} else {
+						value = getShort();
+						testConnection((short) value);
 					}
 					
 					vtype = ValueFactory.toVType(value,

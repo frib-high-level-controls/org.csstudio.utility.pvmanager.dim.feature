@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.epics.pvmanager.dim.AdaptorUtil;
 import org.epics.pvmanager.dim.FormatType;
@@ -33,21 +34,26 @@ public class PVManagerDimString extends DimInfo implements PVManagerDim {
 		Object value = null;
 		if (!formatList.isEmpty()) {
 			if (formatList.size() == 1) {
-				String type = formatList.get(0).getFunctionCode();
-				Integer quantity = formatList.get(0).getQuantity();
+				String type = formatList.get(0).getFunctionCode().toUpperCase();
+				Optional<Integer> quantity = formatList.get(0).getQuantity();
 
 				if (AdaptorUtil.typesMap.containsKey(type)) {
-					if (quantity == 1){ 
-						value = getString();
-						testConnection((String)value);
-					} else{
-						List<String> array = new ArrayList<String>();
-						for(int i=0;i<quantity;i++){
-							String popString = getString();
-							testConnection(popString);
-							array.add(popString);
+					if (quantity.isPresent()) {
+						if (quantity.get() == 1) {
+							value = getString();
+							testConnection((String) value);
+						} else {
+							List<String> array = new ArrayList<String>();
+							for (int i = 0; i < quantity.get(); i++) {
+								String popString = getString();
+								testConnection(popString);
+								array.add(popString);
+							}
+							value = array.toArray();
 						}
-						value = array.toArray();
+					} else {
+						value = getString();
+						testConnection((String) value);
 					}
 					
 					vtype = ValueFactory.toVType(value,
@@ -95,15 +101,22 @@ public class PVManagerDimString extends DimInfo implements PVManagerDim {
 
 					}
 					if (typeOverride == VBoolean.class) {
-						value = (quantity == 1) ? getBoolean()
-								: getBooleanArray();
+						if (quantity.isPresent()) {
+							value = (quantity.get() == 1) ? getBoolean(): getBooleanArray();
+						} else {
+							value = getBoolean();
+						}
 						vtype = ValueFactory.toVType(value, ValueFactory
 								.alarmNone(), ValueFactory.newTime(Timestamp
 								.of(getTimestamp())), ValueFactory
 								.displayNone());
 					}
 					if (typeOverride == VByte.class) {
-						value = (quantity == 1) ? getByte() : getByteArray();
+						if (quantity.isPresent()) {
+							value = (quantity.get() == 1) ? getByte(): getByteArray();
+						} else {
+							value = getByte();
+						}
 						vtype = ValueFactory.toVType(value, ValueFactory
 								.alarmNone(), ValueFactory.newTime(Timestamp
 								.of(getTimestamp())), ValueFactory
@@ -111,48 +124,9 @@ public class PVManagerDimString extends DimInfo implements PVManagerDim {
 					}
 				}
 
-			} else if (formatList.size() > 1) {
-				// List<Class<?>> types = new ArrayList<Class<?>>();
-				// List<String> names = new ArrayList<String>();
-				// List<Object> values = new ArrayList<Object>();
-				// for (String item:format){
-				// String[] typeWithQuanity = item.split(":");
-				// String type = typeWithQuanity[0];
-				// int quantity = 1;
-				// if (typeWithQuanity.length>1){
-				// quantity = Integer.valueOf(typeWithQuanity[1]);
-				// }
-				// if(AdaptorUtil.typesMap.containsKey(type)){
-				// types.add(typesMap.get(type).classType);
-				// names.add(type);
-				// try {
-				// Method method =
-				// this.getClass().getMethod(AdaptorUtil.typesMap.get(type).function);
-				// Method arrayMethod =
-				// this.getClass().getMethod(AdaptorUtil.typesMap.get(type).arrayFunction);
-				// values.add((quantity ==
-				// 1)?method.invoke(this):arrayMethod.invoke(this));
-				// } catch (NoSuchMethodException | SecurityException |
-				// IllegalAccessException | IllegalArgumentException |
-				// InvocationTargetException e) {
-				// values.add(null);
-				// }
-				// } else if (type.equals("C")){
-				// // check string, boolean crap
-				// } else {
-				// continue;
-				// }
-				//
-				//
-				//
-				// }
-				//
-				// vtype = ValueFactory.newVTable(types, names, values);
-
-			}
+			} 
 			message = vtype;
 			message();
-
 		}
 	}
 

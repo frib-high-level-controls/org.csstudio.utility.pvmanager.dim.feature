@@ -1,10 +1,12 @@
 package org.epics.pvmanager.dim;
 
+import java.util.Optional;
+
 public class FormatType {
 	Class<?> classType;
 	String function;
 	String arrayFunction;
-	Integer quantity;
+	Optional<Integer> quantity;
     String functionCode;
 
 	public FormatType(String functionCode, Class<?> classType, String function,
@@ -15,7 +17,7 @@ public class FormatType {
 		this.arrayFunction = arrayFunction;
 	}
 
-	public FormatType(String functionCode, Integer quantity) {
+	public FormatType(String functionCode, Optional<Integer> quantity) {
 		this.functionCode = functionCode;
 		this.quantity = quantity;
 	}
@@ -46,11 +48,11 @@ public class FormatType {
 		this.arrayFunction = arrayFunction;
 	}
 
-	public Integer getQuantity() {
+	public Optional<Integer> getQuantity() {
 		return quantity;
 	}
 
-	public void setQuantity(Integer quantity) {
+	public void setQuantity(Optional<Integer> quantity) {
 		this.quantity = quantity;
 	}
 

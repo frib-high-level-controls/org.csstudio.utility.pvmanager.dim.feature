@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.epics.pvmanager.ChannelWriteCallback;
 import org.epics.pvmanager.MultiplexedChannelHandler;
@@ -13,6 +14,7 @@ import org.epics.pvmanager.dim.adapters.PVManagerDimDouble;
 import org.epics.pvmanager.dim.adapters.PVManagerDimFloat;
 import org.epics.pvmanager.dim.adapters.PVManagerDimInt;
 import org.epics.pvmanager.dim.adapters.PVManagerDimLong;
+import org.epics.pvmanager.dim.adapters.PVManagerDimMixedFormat;
 import org.epics.pvmanager.dim.adapters.PVManagerDimShort;
 import org.epics.pvmanager.dim.adapters.PVManagerDimString;
 import org.epics.util.time.Timestamp;
@@ -52,9 +54,10 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 		for(String formatItem:format) {
 			String[] typeWithQuanity = formatItem.split(":");
 			String functionCode = typeWithQuanity[0];
-			Integer quantity = 1;
+			Optional<Integer> quantity;
+			quantity = Optional.empty();
 			if (typeWithQuanity.length > 1) {
-				quantity = Integer.valueOf(typeWithQuanity[1]);
+				quantity = Optional.of(Integer.valueOf(typeWithQuanity[1]));
 			}
 			formatList.add(new FormatType(functionCode,quantity));
 		}
@@ -70,7 +73,7 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 			formatList.get(0).functionCode = "C";
 		} else if (channelName.endsWith("<VInt>")) {
 			this.typeOverride = VInt.class;
-			formatList.set(0, new FormatType("I",1));
+			formatList.get(0).functionCode = "I";
 		} else if (channelName.endsWith("<VShort>")) {
 			this.typeOverride = VShort.class;
 			formatList.get(0).functionCode = "S";
@@ -237,6 +240,26 @@ public class DimChannelHandler extends MultiplexedChannelHandler<DimChannelHandl
 						processConnection(null);
 					}
 				};
+			} else {
+				
+				dimInfo = new PVManagerDimMixedFormat(channelName, formatList) {
+
+					@Override
+					public void message() {
+						processMessage(getMessage());
+					}
+
+					@Override
+					public void connected() {
+						processConnection(DimChannelHandler.this);
+					}
+
+					@Override
+					public void disconnected() {
+						processConnection(null);
+					}
+				};
+				
 			}
 			processConnection(this);
 		} catch (Exception ex) {

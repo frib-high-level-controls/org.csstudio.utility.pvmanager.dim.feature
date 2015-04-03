@@ -2,6 +2,7 @@ package org.epics.pvmanager.dim.adapters;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.epics.pvmanager.dim.AdaptorUtil;
 import org.epics.pvmanager.dim.FormatType;
@@ -29,20 +30,25 @@ public class PVManagerDimFloat extends DimInfo implements PVManagerDim {
 		Object value = null;
 		if (!formatList.isEmpty()) {
 			if (formatList.size() == 1) {
-				String type = formatList.get(0).getFunctionCode();
-				Integer quantity = formatList.get(0).getQuantity();
+				String type = formatList.get(0).getFunctionCode().toUpperCase();
+				Optional<Integer> quantity = formatList.get(0).getQuantity();
 				if (AdaptorUtil.typesMap.containsKey(type)) {
-					if (quantity == 1){ 
-						value = getFloat();
-						testConnection((float)value);
-					} else{
-						List<Float> array = new ArrayList<Float>();
-						for(int i=0;i<quantity;i++){
-							float popFloat = getFloat();
-							testConnection(popFloat);
-							array.add(popFloat);
+					if (quantity.isPresent()) {
+						if (quantity.get() == 1) {
+							value = getFloat();
+							testConnection((float) value);
+						} else {
+							List<Float> array = new ArrayList<Float>();
+							for (int i = 0; i < quantity.get(); i++) {
+								float popFloat = getFloat();
+								testConnection(popFloat);
+								array.add(popFloat);
+							}
+							value = Floats.toArray(array);
 						}
-						value = Floats.toArray(array);
+					} else {
+						value = getFloat();
+						testConnection((float) value);
 					}
 					
 					vtype = ValueFactory.toVType(value,
